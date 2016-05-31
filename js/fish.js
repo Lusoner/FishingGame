@@ -43,7 +43,6 @@ Fish.prototype.deaded=function(){
 		this.sx=this.w*5;
 	}
 	this.sx+=this.w;
-	alert(1);
 	if(this.sx>=this.w*8){
 		this.sx=this.w*5;
 	}	
