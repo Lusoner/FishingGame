@@ -1,0 +1,280 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="author" content="智能社 - zhinengshe.com" />
+<meta name="copyright" content="智能社 - zhinengshe.com" />
+<meta name="description" content="智能社是一家专注于web前端开发技术的公司，目前主要提供JavaScript培训和HTML5培训两项服务，同时还推出了大量javascript基础知识教程，智能课堂为你带来全新的学习方法和快乐的学习体验。" />
+<title>智能社— http://www.zhinengshe.com</title>
+<style>
+*{margin:0; padding:0;}
+body{background:#000; text-align:center;}
+canvas{background:url(img/game_bg_2_hd.jpg) no-repeat;}
+</style>
+<script src="js/common.js"></script>
+<script src="js/sprite.js"></script>
+<script src="js/fish.js"></script>
+<script src="js/cannon.js"></script>
+<script src="js/bullet.js"></script>
+<script src="js/shark.js"></script>
+<script src="js/web.js"></script>
+<script src="js/coin.js"></script>
+<script>
+window.onload=function(){
+	var oC = document.getElementById('c1');
+	var gd = oC.getContext('2d');
+	loadImage({
+		'bottom':'img/bottom.png',
+		'bullet':'img/bullet.png',
+		'cannon1':'img/cannon1.png',
+		'cannon2':'img/cannon2.png',
+		'cannon3':'img/cannon3.png',
+		'cannon4':'img/cannon4.png',
+		'cannon5':'img/cannon5.png',
+		'cannon6':'img/cannon6.png',
+		'cannon7':'img/cannon7.png',
+		'fish1':'img/fish1.png',
+		'fish2':'img/fish2.png',
+		'fish3':'img/fish3.png',
+		'fish4':'img/fish4.png',
+		'fish5':'img/fish5.png',
+		'shark1':'img/shark1.png',
+		'shark2':'img/shark2.png',
+		'coinAni1':'img/coinAni1.png',
+		'coinAni2':'img/coinAni2.png',
+		'web':'img/web.png'
+	},function(result){
+		var bottom = new Sprite(result.bottom);
+		bottom.w = 765;
+		bottom.h = 71;
+		
+		bottom.x = oC.width/2;
+		bottom.y = oC.height-bottom.h/2;
+		
+
+		
+		var cannon = new Cannon(result,6);
+		cannon.x = bottom.x+cannon.w/2+5;
+		cannon.y = bottom.y;
+		
+		
+		oC.onmousemove=function(ev){
+			var a = ev.pageX-oC.offsetLeft;
+			var b = ev.pageY-oC.offsetTop;
+			var x = a-cannon.x;
+			var y = b-cannon.y;
+			
+			cannon.r = a2d(Math.atan2(y,x))+90;
+		};
+		
+		var aBullet = [];
+		oC.onclick=function(){
+			var oA = document.createElement('audio');
+			oA.src = 'mp3/gunShot.mp3';
+			oA.play();
+			var bullet = new Bullet(result['bullet'],cannon.type);
+			bullet.r = cannon.r;
+			bullet.x = cannon.x;
+			bullet.y = cannon.y;
+			aBullet.push(bullet);
+		};
+		
+		var aFish = [];
+		setInterval(function(){
+			var fish = new Fish(result,rnd(1,6));
+			fish.x = -100;
+			fish.y = rnd(0,oC.height);
+			fish.r = rnd(45,135);
+			aFish.push(fish);
+		},300);
+		var aShark = [];
+		setInterval(function(){
+			var shark = new Shark(result,rnd(1,2));
+			shark.x = -100;
+			shark.y = rnd(0,oC.height);
+			shark.r = rnd(45,135);
+			aShark.push(shark);
+		},10000);
+		//造网
+		var aWeb=[];
+		//造金币
+		var aCoin=[];
+		//造死鱼组
+		var aDeadFish=[];
+		var aDeadShark=[];
+		//画图，移动
+		setInterval(function(){
+			gd.clearRect(0,0,oC.width,oC.height);
+			bottom.draw(gd);
+			for(var i=0;i<aBullet.length;i++){
+				aBullet[i].move();
+				aBullet[i].draw(gd);
+			}
+			for(var i=0;i<aFish.length;i++){
+				aFish[i].move();
+				aFish[i].swimming();
+				aFish[i].draw(gd);
+			}
+			for(var i=0;i<aShark.length;i++){
+				aShark[i].move();
+				aShark[i].swimming();
+				aShark[i].draw(gd);
+			}
+			for(var i=0;i<aWeb.length;i++){
+				aWeb[i].draw(gd);
+			}
+			
+			for(var i=0;i<aCoin.length;i++){
+				aCoin[i].show();
+				aCoin[i].draw(gd);
+			}
+			for(var i=0;i<aDeadFish.length;i++){
+				aDeadFish[i].deaded();
+				aDeadFish[i].draw(gd);
+			}
+			for(var i=0;i<aDeadShark.length;i++){
+				aDeadShark[i].deaded();
+				aDeadShark[i].draw(gd);
+			}
+			//console.log(aDeadFish.length);
+			//检测炮弹
+			for(var i=0;i<aBullet.length;i++){
+				if(aBullet[i].x<-100||aBullet[i].y<-100||aBullet[i].x>(oC.width+100)||aBullet[i].y>(oC.height+100)){
+					aBullet.splice(i,1);
+					i--;
+				}
+			}
+			
+			
+			//检测鱼
+			for(var i=0;i<aFish.length;i++){
+				if(aFish[i].x<-100||aFish[i].y<-100||aFish[i].x>(oC.width+100)||aFish[i].y>(oC.height+100)){
+					aFish.splice(i,1);
+					i--;
+				}
+			}
+
+			//检测鲨鱼
+			for(var i=0;i<aShark.length;i++){
+				if(aShark[i].x<-100||aShark[i].y<-100||aShark[i].x>(oC.width+100)||aShark[i].y>(oC.height+100)){
+					aShark.splice(i,1);
+					i--;
+				}
+			}
+			//碰撞检测
+			for(var i=0;i<aBullet.length;i++){
+				for(var j=0;j<aFish.length;j++){
+					if(aBullet[i].collTest(aFish[j],'fish')){
+						aFish[j].life-=1;
+						if(aFish[j].life<=0){
+							aFish[j].dead();
+							var deadFish=new Fish(result,aFish[j].type);
+							deadFish.img = aFish[j].img;	
+							deadFish.sx = aFish[j].sx;
+							deadFish.sy = aFish[j].sy;
+							deadFish.x = aFish[j].x;
+							deadFish.y = aFish[j].y;
+							deadFish.w = aFish[j].w;
+							deadFish.h = aFish[j].h;
+							deadFish.r = aFish[j].r;
+							deadFish.speed = 0;
+							aFish.splice(j,1);
+							j--;							
+							aDeadFish.push(deadFish);
+							//造网
+							var web = new Web(result['web'],cannon.type);
+							web.x = aBullet[i].x;
+							web.y = aBullet[i].y;
+							aWeb.push(web);
+							var coin = new Coin(result,1);
+							coin.x = aBullet[i].x;
+							coin.y = aBullet[i].y;	
+							setTimeout(function(){
+								aWeb.shift();
+								aDeadFish.shift();
+								//删掉网后造金币											
+								aCoin.push(coin);
+								setTimeout(function(){
+									aCoin.shift();
+								},600);
+							},300);
+
+							aBullet.splice(i,1);
+							// (function(j){
+							// 	setTimeout(function(){
+
+							// 	},300);
+							// })(j);
+							// i--;							
+						}
+
+					}
+				}
+				for(var n=0;n<aShark.length;n++){
+					if(aBullet[i].collTest(aShark[n],'shark')){
+						aShark[n].life-=1;
+						if(aShark[n].life<=0){
+							aShark[n].dead();
+							var deadShark=new Shark(result,aShark[n].type);
+							deadShark.img = aShark[n].img;	
+							deadShark.sx = aShark[n].sx;
+							deadShark.sy = aShark[n].sy;
+							deadShark.x = aShark[n].x;
+							deadShark.y = aShark[n].y;
+							deadShark.w = aShark[n].w;
+							deadShark.h = aShark[n].h;
+							deadShark.r = aShark[n].r;
+							deadShark.speed = 0;
+							aShark.splice(n,1);
+							n--;							
+							aDeadShark.push(deadShark);
+							//造网
+							var web = new Web(result['web'],cannon.type);
+							web.x = aBullet[i].x;
+							web.y = aBullet[i].y;
+							aWeb.push(web);
+							var coin = new Coin(result,2);
+							coin.x = aBullet[i].x;
+							coin.y = aBullet[i].y;							
+							setTimeout(function(){
+								aWeb.shift();
+								aDeadShark.shift();
+								//删掉网后造金币		
+								aCoin.push(coin);
+								console.log(aCoin.length);								
+								setTimeout(function(){
+									aCoin.shift();
+								},600);								
+							},300);
+							aBullet.splice(i,1);
+							//i--;
+						}							
+						}
+
+				}
+			}
+			
+			
+			cannon.draw(gd);
+		},30);
+	});
+};
+</script>
+</head>
+
+<body>
+<canvas id="c1" width="800" height="600"></canvas>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
