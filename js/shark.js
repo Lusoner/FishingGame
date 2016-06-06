@@ -30,7 +30,6 @@ Shark.prototype.deaded=function(){
 		this.sx=this.w*9;
 	}
 	this.sx+=this.w;
-	alert(1);
 	if(this.sx>=this.w*12){
 		this.sx=this.w*9;
 	}	
